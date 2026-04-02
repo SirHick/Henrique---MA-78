@@ -6,7 +6,7 @@
 import random
 
 for i in range(20):
-    velocidade = random.uniform(0, 15)
+    velocidade = random.uniform(0.1, 1.0)
     print("Velocidade (m/s): ", round(velocidade,1))
     if(velocidade < 0.5):
-        print("\nALARME! Velocidade muito alta!\n")
+        print("\nALARME! Velocidade muito baixa!\n")
