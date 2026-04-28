@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa Segura - Automações</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #0f172a;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --warning: #f59e0b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --nav-bg: #0f172a;
+        }
+
+        /* ===== TEMA ESCURO ===== */
+        body.dark-mode {
+            --secondary: #f8fafc;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --nav-bg: #020617;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg); color: var(--secondary); height: 100vh; display: flex; flex-direction: column; transition: background-color 0.3s, color 0.3s; }
+
+        /* ================= TELA DE LOGIN ================= */
+        #login-view {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .login-card {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s ease-in-out;
+            transition: background-color 0.3s;
+        }
+
+        .login-card h2 { color: var(--secondary); margin-bottom: 10px; font-size: 1.8rem; }
+        .login-card p { color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem; }
+        .login-icon { font-size: 4rem; color: var(--primary); margin-bottom: 20px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--secondary); margin-bottom: 5px; }
+        .input-group input { 
+            width: 100%; padding: 12px 15px; border-radius: 10px; 
+            border: 1px solid var(--border-color); outline: none; font-size: 1rem; transition: 0.3s;
+            background: var(--bg); color: var(--secondary);
+        }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+
+        .btn-login {
+            background: var(--primary); color: white; border: none; padding: 15px; width: 100%;
+            border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .btn-login:hover { background: #0284c7; }
+
+        /* ================= PAINEL DO APP ================= */
+        #app-view { display: none; flex: 1; flex-direction: column; }
+
+        .nav-tabs {
+            background-color: var(--nav-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+
+        .tab-btn {
+            background: none; border: none; color: #94a3b8; padding: 15px 20px;
+            cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover { color: #e2e8f0; }
+        .tab-btn.active { color: white; border-bottom: 3px solid var(--primary); }
+        .tab-btn i { margin-right: 8px; }
+
+        .btn-action-nav { background: transparent; border-radius: 20px; padding: 5px 15px; margin-left: 10px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-logout { color: var(--danger); border: 1px solid var(--danger); }
+        .btn-logout:hover { background: var(--danger); color: white; }
+        
+        .btn-theme { color: var(--primary); border: 1px solid var(--primary); }
+        .btn-theme:hover { background: var(--primary); color: white; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; width: 100%; }
+        .content-section { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .content-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-header { margin-bottom: 30px; text-align: center; }
+        .section-header h2 { font-size: 2rem; color: var(--secondary); transition: color 0.3s; }
+        .section-header p { color: var(--text-muted); transition: color 0.3s; }
+        .user-badge { display: inline-block; background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-top: 10px; }
+
+        /* Estilos dos Cards (Abertura) */
+        .door-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .door-card { background: var(--card); padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s; }
+        .door-icon { font-size: 4rem; margin-bottom: 20px; color: var(--primary); }
+
+        .btn-unlock {
+            background: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 1.1rem;
+            font-weight: 600; cursor: pointer; width: 100%; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-unlock:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-unlock:active { transform: scale(0.95); }
+
+        /* Estilos da Tabela */
+        .log-container { background: var(--card); border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: background-color 0.3s; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: rgba(0,0,0,0.03); text-align: left; padding: 15px; color: var(--text-muted); font-size: 0.9rem; }
+        body.dark-mode th { background: rgba(255,255,255,0.05); }
+        td { padding: 15px; border-top: 1px solid var(--border-color); font-size: 0.95rem; color: var(--secondary); transition: border-color 0.3s, color 0.3s; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-open { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .badge-close { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        /* Formulário de Solicitação */
+        .form-request { background: var(--card); padding: 30px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; transition: background-color 0.3s; }
+        .form-request select, .form-request textarea { 
+            width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 20px; 
+            border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; 
+            background: var(--bg); color: var(--secondary); transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        .form-request textarea { resize: vertical; min-height: 100px; }
+
+        /* Card de Aprovação de Visita */
+        .approval-card {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--warning);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: none; 
+            flex-direction: column;
+            gap: 15px;
+            transition: opacity 0.3s ease;
+        }
+        .approval-header { display: flex; align-items: center; gap: 10px; color: var(--warning); font-weight: 800; font-size: 1.2rem; }
+        .approval-actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        
+        .btn-action {
+            flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white;
+            font-size: 1rem; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-action.approve { background: var(--success); }
+        .btn-action.approve:hover { background: #16a34a; }
+        .btn-action.deny { background: var(--danger); }
+        .btn-action.deny:hover { background: #dc2626; }
+
+        /* Botão de Teste */
+        .btn-test {
+            background: var(--warning); color: white; border: none; padding: 10px 20px; border-radius: 8px; 
+            font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            margin-top: 20px; width: 100%; justify-content: center;
+        }
+        .btn-test:hover { background: #d97706; }
+
+        #toast { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 12px 25px; border-radius: 10px; display: none; animation: fadeIn 0.3s; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <div id="login-view">
+        <div class="login-card">
+            <div class="login-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <h2>Casa Segura</h2>
+            <p>Faça login para acessar suas automações.</p>
+            
+            <form id="form-login" onsubmit="realizarLogin(event)">
+                <div class="input-group">
+                    <label>Apt / Unidade do Morador</label>
+                    <input type="text" id="input-apto" placeholder="Ex: Apto 101" required>
+                </div>
+                <div class="input-group">
+                    <label>Senha de Acesso</label>
+                    <input type="password" placeholder="Sua senha (digite qualquer coisa)" required>
+                </div>
+                <button type="submit" class="btn-login"><i class="fa-solid fa-right-to-bracket"></i> Entrar no Painel</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-view">
+        
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'info')"><i class="fa-solid fa-house"></i>Início</button>
+            <button class="tab-btn" onclick="openTab(event, 'controles')"><i class="fa-solid fa-key"></i>Abertura</button>
+            <button class="tab-btn" onclick="openTab(event, 'chamados')">
+                <i class="fa-solid fa-bell"></i>Solicitações 
+                <span id="badge-notificacao" style="display: none; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; position: relative; top: -5px;">1</span>
+            </button>
+            <button class="tab-btn" onclick="openTab(event, 'registros')"><i class="fa-solid fa-list-check"></i>Registros</button>
+            
+            <button class="btn-action-nav btn-theme" onclick="alternarTema()"><i class="fa-solid fa-moon" id="icon-theme"></i> Tema</button>
+            <button class="btn-action-nav btn-logout" onclick="realizarLogout()"><i class="fa-solid fa-power-off"></i> Sair</button>
+        </nav>
+
+        <div id="toast">Ação realizada com sucesso!</div>
+
+        <div class="container">
+            
+            <section id="info" class="content-section active">
+                <div class="section-header">
+                    <h2>Casa Segura - Automações</h2>
+                    <span class="user-badge" id="display-user-name">Bem-vindo(a)</span>
+                </div>
+                <div style="background: var(--card); padding: 30px; border-radius: 15px; border-left: 5px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: background-color 0.3s;">
+                    <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-circle-check" style="color: var(--primary);"></i> Sistema Ativo</h3>
+                    <p style="color: var(--text-muted);">Sua interface é privada. Todos os acessos realizados e solicitações enviadas a partir de agora serão registrados no nome da sua unidade.</p>
+                    
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
+                    
+                    <h4 style="color: var(--text-muted);"><i class="fa-solid fa-vial"></i> Área de Teste</h4>
+                    <p style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-muted);">Clique abaixo para simular a portaria enviando uma solicitação de entrada para o seu celular.</p>
+                    <button class="btn-test" onclick="simularChegadaVisitante()">
+                        <i class="fa-solid fa-phone-volume fa-shake"></i> Simular Tocar Interfone
+                    </button>
+                </div>
+            </section>
+
+            <section id="controles" class="content-section">
+                <div class="section-header">
+                    <h2>Controle de Acessos</h2>
+                    <p>Acione os comandos remotos abaixo.</p>
+                </div>
+                <div class="door-grid">
+                    <div class="door-card">
+                        <div class="door-icon"><i class="fa-solid fa-building"></i></div>
+                        <h3>Portão Principal</h3>
+                        <br>
+                        <button class="btn-unlock" onclick="alternarPorta(event, 'Portão Principal', 'portão')">
+                            <i class="fa-solid fa-lock-open"></i> Abrir o portão
+                        </button>
+                    </div>
+                    <div class="door-card">
+                        <div class="door-icon"><i class="fa-solid fa-door-open"></i></div>
+                        <h3>Minha Casa</h3>
+                        <br>
+                        <button class="btn-unlock" onclick="alternarPorta(event, 'Porta do Apartamento', 'porta')">
+                            <i class="fa-solid fa-lock-open"></i> Abrir a porta
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="chamados" class="content-section">
+                <div class="section-header">
+                    <h2>Central de Solicitações</h2>
+                    <p>Gerencie quem entra e solicite serviços à portaria.</p>
+                </div>
+
+                <div class="approval-card" id="card-visitante">
+                    <div class="approval-header">
+                        <i class="fa-solid fa-bell fa-shake"></i> Alerta da Portaria
+                    </div>
+                    <p style="color: var(--secondary); margin: 0;">
+                        <strong>Entregador do iFood (João)</strong> está aguardando na entrada principal. Deseja liberar o acesso?
+                    </p>
+                    <div class="approval-actions">
+                        <button class="btn-action approve" onclick="responderVisitante('Entregador (João)', true)">
+                            <i class="fa-solid fa-check-circle"></i> Liberar Entrada
+                        </button>
+                        <button class="btn-action deny" onclick="responderVisitante('Entregador (João)', false)">
+                            <i class="fa-solid fa-ban"></i> Negar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-request">
+                    <h3 style="margin-bottom: 20px; color: var(--secondary);"><i class="fa-solid fa-paper-plane"></i> Enviar Mensagem à Central</h3>
+                    <form onsubmit="enviarSolicitacao(event)">
+                        <label style="font-weight: 600; color: var(--secondary);">Assunto</label>
+                        <select id="tipo-solicitacao" required>
+                            <option value="">Selecione um assunto...</option>
+                            <option value="Manutenção de Interfone">Problema no Interfone / App</option>
+                            <option value="Solicitar Chave/Tag">Solicitar nova Tag de Acesso</option>
+                            <option value="Acesso de Visitante">Deixar Visitante Pré-Autorizado</option>
+                            <option value="Outros">Outros Assuntos</option>
+                        </select>
+
+                        <label style="font-weight: 600; color: var(--secondary);">Detalhes</label>
+                        <textarea placeholder="Descreva sua solicitação aqui..." required id="texto-solicitacao"></textarea>
+
+                        <button type="submit" class="btn-unlock" style="border-radius: 8px;">
+                            <i class="fa-regular fa-paper-plane"></i> Enviar Mensagem
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="registros" class="content-section">
+                <div class="section-header">
+                    <h2>Histórico em Tempo Real</h2>
+                    <p>Logs automáticos vinculados à sua unidade.</p>
+                </div>
+                <div class="log-container">
+                    <table id="tabela-logs">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Unidade</th>
+                                <th>Ação</th>
+                                <th>Local / Assunto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        let usuarioAtual = "";
+
+        // ----- FUNÇÕES DE LOGIN / LOGOUT -----
+        function realizarLogin(event) {
+            event.preventDefault(); 
+            const inputApto = document.getElementById('input-apto').value;
+            usuarioAtual = inputApto; 
+            
+            document.getElementById('display-user-name').innerText = "Unidade: " + usuarioAtual;
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('app-view').style.display = 'flex';
+            
+            document.querySelector('.tab-btn.active').click();
+            mostrarToast("Login efetuado com sucesso!");
+        }
+
+        function realizarLogout() {
+            usuarioAtual = "";
+            document.getElementById('input-apto').value = "";
+            document.getElementById('app-view').style.display = 'none';
+            document.getElementById('login-view').style.display = 'flex';
+        }
+
+        // ----- MODO ESCURO (NOVA FUNÇÃO) -----
+        function alternarTema() {
+            const body = document.body;
+            const icone = document.getElementById('icon-theme');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                icone.classList.remove('fa-moon');
+                icone.classList.add('fa-sun');
+            } else {
+                icone.classList.remove('fa-sun');
+                icone.classList.add('fa-moon');
+            }
+        }
+
+        // ----- LÓGICA DAS ABAS -----
+        function openTab(evt, tabName) {
+            let i, content, tablinks;
+            content = document.getElementsByClassName("content-section");
+            for (i = 0; i < content.length; i++) { content[i].classList.remove("active"); }
+            
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById("toast");
+            toast.innerText = mensagem;
+            toast.style.display = "block";
+            setTimeout(() => { toast.style.display = "none"; }, 3000);
+        }
+
+        // ----- ADICIONAR REGISTROS -----
+        function adicionarRegistro(local, acao, tipo) {
+            const tabela = document.getElementById("tabela-logs").getElementsByTagName('tbody')[0];
+            const novaLinha = tabela.insertRow(0);
+            
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR') + " - " + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+            novaLinha.insertCell(0).innerHTML = dataFormatada;
+            novaLinha.insertCell(1).innerHTML = `<strong>${usuarioAtual}</strong>`;
+            
+            let badgeClass = "badge-neutral";
+            if(tipo === "abrir") badgeClass = "badge-open";
+            if(tipo === "fechar") badgeClass = "badge-close";
+            if(tipo === "solicitacao") badgeClass = "badge-open"; 
+            
+            novaLinha.insertCell(2).innerHTML = `<span class="badge ${badgeClass}">${acao}</span>`;
+            novaLinha.insertCell(3).innerHTML = local; 
+        }
+
+        // ----- ABRIR/FECHAR PORTAS -----
+        const estadoDasPortas = { 'Portão Principal': 'fechado', 'Porta do Apartamento': 'fechado' };
+
+        function alternarPorta(event, nomePorta, tipo) {
+            const btn = event.currentTarget;
+            const estadoAtual = estadoDasPortas[nomePorta];
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+            btn.style.background = "var(--text-muted)";
+            btn.style.pointerEvents = "none";
+
+            setTimeout(() => {
+                if (estadoAtual === 'fechado') {
+                    adicionarRegistro(`<strong>${nomePorta}</strong>`, "Abertura Remota", "abrir");
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Aberto!';
+                    btn.style.background = "var(--success)";
+                    mostrarToast("Comando enviado: Porta aberta.");
+                    
+                    setTimeout(() => {
+                        estadoDasPortas[nomePorta] = 'aberto';
+                        btn.innerHTML = '<i class="fa-solid fa-lock"></i> Fechar o ' + tipo;
+                        btn.style.background = "var(--danger)";
+                        btn.style.pointerEvents = "auto";
+                    }, 1000);
+                } else {
+                    adicionarRegistro(`<strong>${nomePorta}</strong>`, "Fechamento Remoto", "fechar");
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Fechado!';
+                    btn.style.background = "var(--success)";
+                    mostrarToast("Comando enviado: Porta fechada.");
+                    
+                    setTimeout(() => {
+                        estadoDasPortas[nomePorta] = 'fechado';
+                        btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Abrir o ' + tipo;
+                        btn.style.background = ""; 
+                        btn.style.pointerEvents = "auto";
+                    }, 1000);
+                }
+            }, 800);
+        }
+
+        // ----- EVENTO: SIMULAR CHEGADA DE VISITANTE -----
+        function simularChegadaVisitante() {
+            const card = document.getElementById("card-visitante");
+            const badge = document.getElementById("badge-notificacao");
+            
+            card.style.display = "flex";
+            card.style.opacity = "1";
+            
+            badge.style.display = "inline-block";
+            
+            mostrarToast("🔔 Interfone tocando! Verifique a aba de Solicitações.");
+        }
+
+        // ----- RESPONDER VISITANTE -----
+        function responderVisitante(nomePessoa, aprovado) {
+            const card = document.getElementById("card-visitante");
+            const badge = document.getElementById("badge-notificacao");
+            
+            if(aprovado) {
+                mostrarToast(`Acesso liberado para ${nomePessoa}.`);
+                adicionarRegistro(`<strong>Autorização:</strong> ${nomePessoa}`, "Acesso Liberado", "abrir");
+            } else {
+                mostrarToast(`Acesso NEGADO para ${nomePessoa}.`);
+                adicionarRegistro(`<strong>Autorização:</strong> ${nomePessoa}`, "Acesso Negado", "fechar");
+            }
+
+            card.style.opacity = "0";
+            setTimeout(() => {
+                card.style.display = "none";
+                badge.style.display = "none";
+                
+                document.querySelector('.tab-btn:nth-child(4)').click();
+            }, 300);
+        }
+
+        // ----- ENVIAR MENSAGEM (FORMULÁRIO PADRÃO) -----
+        function enviarSolicitacao(event) {
+            event.preventDefault(); 
+            
+            const assunto = document.getElementById('tipo-solicitacao').value;
+            const mensagem = document.getElementById('texto-solicitacao').value; 
+            
+            const btn = event.currentTarget.querySelector('button');
+            const conteudoOriginalBtn = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+            btn.style.background = "var(--text-muted)";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Enviado com sucesso!';
+                btn.style.background = "var(--success)";
+                
+                const detalhesChamado = `
+                    <strong>Chamado: ${assunto}</strong><br>
+                    <span style="color: var(--text-muted); font-size: 0.85rem; display: inline-block; margin-top: 5px;">
+                        <i class="fa-regular fa-comment-dots"></i> "${mensagem}"
+                    </span>
+                `;
+                
+                adicionarRegistro(detalhesChamado, "Solicitação Aberta", "solicitacao");
+                mostrarToast("Sua solicitação foi enviada à central.");
+
+                setTimeout(() => {
+                    event.target.reset(); 
+                    btn.innerHTML = conteudoOriginalBtn;
+                    btn.style.background = "";
+                    btn.disabled = false;
+                    document.querySelector('.tab-btn:nth-child(4)').click();
+                }, 1500);
+
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>
